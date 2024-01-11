@@ -1,0 +1,229 @@
+import { combineReducers, createStore } from "redux";
+import throwCart from "../reducer/throwCart";
+import removeCart from "../reducer/removeCart";
+
+const store = createStore(combineReducers({cart: throwCart, remove: removeCart}), window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__());
+
+export {store}
+
+<Provider store={store}>
+  <App />
+</Provider>
+
+const initialState = {
+    cartProducts: []
+}
+
+const throwCart = (state = initialState, action) => {
+    switch(action.type){
+        case "ADD_TO_CART":
+            return {
+                cartProducts: [...state.cartProducts, action.product]
+            }
+            default:
+                return state
+    }
+}
+
+export default throwCart
+
+const Home = () => {
+    const dispatch = useDispatch()
+    const [products, setProducts] = useState([])
+    const [loading, setLoading] = useState(true)
+
+    useEffect(() => {
+        fetch("https://api.escuelajs.co/api/v1/products")
+            .then(response => response.json())
+            .then(data => setProducts(data))
+            .catch(error => console.log(error))
+            .finally(() => setLoading(false))
+    }, [])
+
+    const handleThrowCart = (product) => {
+        dispatch({ type: "ADD_TO_CART", product })
+    }
+
+    const dispatch = useDispatch()
+    const cart = useSelector(state => state.cart.cartProducts)
+    const remove = useSelector(state => state.remove.cartProducts)
+    console.log(cart)
+
+    <div style={theme ? {backgroundColor: "#000"} : {backgroundColor: "#fff"}}>
+
+    import { createSlice } from "@reduxjs/toolkit"
+
+const initialState = {
+    count: 0
+}
+
+const counterSlice = createSlice ({
+    name: 'counter',
+    initialState,
+    reducers: {
+        increment: (state) => {
+            state.count += 1
+        },
+        decrement: (state) => {
+            state.count -= 1
+        },
+        incrementByAmount: (state, action) => {
+            state.count += action.payload
+        }
+    }
+})
+
+export const {increment, decrement} = counterSlice.actions
+export default counterSlice.reducer
+
+import { configureStore } from "@reduxjs/toolkit";
+import counterReducer from "../features/counterSlice";
+
+const store = configureStore({
+    reducer: {
+        counterReducer 
+    }
+}, window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__());
+
+export {store}
+
+function App() {
+  const data = useSelector((state) => state.counterReducer.count)
+  const dispatch = useDispatch()
+
+  return (
+    <>
+      <h1>Hello World</h1>
+      <button onClick={() => dispatch(increment())}>+</button>
+      <p>{data}</p>
+    </>
+  )
+}
+
+const Users = () => {
+    const dispatch = useDispatch()
+    const [data, setData] = useState([]);
+    const [loading, setLoading] = useState(true)
+
+    useEffect(() => {
+        const  fetchData = async () => {
+        try{
+            const response = await axios("https://reqres.in/api/users")
+            setData(response.data.data)
+        }catch(error){
+            console.log(error);
+        }
+        finally{        
+            setLoading(false)
+        }
+        }
+        fetchData()
+    }, [])
+
+  return (
+    <div className="container">
+        <Link to="saved"><div className="saved"><button className="btn">Saved Users</button></div></Link>
+        <div className="users_wp">
+        {loading ? <h1>Loading...</h1> :
+            data.map(user =>
+                <div className='user' key={user.id}>
+                    <img width={100} height={100} src={user.avatar} alt="" />
+                    <h2>{user.first_name}</h2>
+                    <h3>{user.last_name}</h3>
+                    <p style={{color: "darkblue"}}>{user.email}</p>
+                    <button onClick={() => dispatch(saveUser(user))}>Save User</button>
+                    </div>
+                )
+        }
+    </div>
+    </div>
+  )
+}
+
+const savedUserSlice = createSlice({
+    name: 'savedUser',
+    initialState,
+    reducers: {
+        saveUser: (state, action) => {
+            const exist = state.saved.findIndex(user => user.id === action.payload.id)
+            if(exist === -1){
+                state.saved.push(action.payload)
+            }
+            return state
+        }
+    }
+})
+
+"use client";
+import { Provider } from "react-redux";
+import { store } from "./store";
+
+const AppProvider = ({children}) => {
+  return (
+    <Provider store={store}>{children}</Provider>
+  )
+}
+
+export default AppProvider
+
+import { createSlice } from "@reduxjs/toolkit";
+import { searchFetch } from "../lib/searchFetch";
+
+const initialState = {
+    data: [],
+    isloading: false,
+    success: false,
+    error: false
+}
+
+const searchSlice = createSlice({
+    name: "search",
+    initialState,
+    reducers: {},
+    extraReducers: (builder) => {
+        builder.addCase(searchFetch.pending, (state, action) => {
+            state.isloading = true
+        }),
+        builder.addCase(searchFetch.fulfilled, (state, action) => {
+            state.isloading = false
+            state.data = action.payload
+            state.error = false;
+            state.success = true;
+        }),
+        builder.addCase(searchFetch.rejected, (state, action) => {
+            state.isloading = false;
+            state.error = true
+        })
+    }
+})
+
+export default searchSlice.reducer
+
+import { ADD_TO_CART, REMOVE_ALL_FROM_CART, REMOVE_SINGLE_PRODUCT } from "../actions"
+
+const initialState = {
+    cart_products: []
+}
+
+const cartReducer = ( state = initialState, action ) => {
+
+    switch(action.type){
+        case ADD_TO_CART:
+            return {
+                cart_products: [ ...state.cart_products, action.product]
+            }
+        case REMOVE_ALL_FROM_CART:
+            return {
+                cart_products: []
+            }
+        case REMOVE_SINGLE_PRODUCT:
+            return{
+                cart_products: state.cart_products.filter((product, index) => index !== action.index )
+            }
+        default:
+            return state
+    }
+
+}
+
+export default cartReducer
